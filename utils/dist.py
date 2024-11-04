@@ -94,6 +94,6 @@ def load_ckpt(load_from_location, expected_hash=None):
                 os.remove(save_path)
                 return load_ckpt(load_from_location, expected_hash)
     if T.distributed.is_initialized():
-        T.distributed.barrier() # so that ranks don't try to laod checkpoint before it's finished downloading
+        T.distributed.barrier() # so that ranks don't try to load checkpoint before it's finished downloading
     loaded = T.load(f"ckpt/{load_from_location}.pt", weights_only=False, map_location='cpu')    
     return loaded
