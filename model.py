@@ -372,11 +372,13 @@ class HertzDevModel(nn.Module):
     
 
 
-def get_hertz_dev_config(is_split=True):
+def get_hertz_dev_config(is_split=True, use_pure_audio_ablation=False):
     if is_split:
         checkpoints = [('inference_care_50000', 'e4ff4fe5c7e9f066410d2a5673b7a935'), ('inference_scion_54000', 'cb8bc484423922747b277ebc2933af5d')]
-    else:
+    elif not use_pure_audio_ablation:
         checkpoints = [('inference_whip_72000', '5e7cee7316900737d55fc5d44cc7a8f7'), ('inference_caraway_112000', 'fcb8368ef8ebf7712f3e31e6856da580')]
+    else:
+        checkpoints = [('inference_whip_72000', '5e7cee7316900737d55fc5d44cc7a8f7'), ('inference_syrup_110000', '353c48f553f1706824c11f3bb6a049e9')]
 
     quantizer_config=LatentQuantizer.Config(
         from_pretrained=('inference_volcano_3', 'd42bf674022c5f84b051d5d7794f6169'),
