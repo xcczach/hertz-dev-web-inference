@@ -19,7 +19,7 @@ def Conv1d1x1(in_channels, out_channels, bias=True):
 
 
 class NonCausalConv1d(nn.Module):
-    """1D noncausal convloution w/ 2-sides padding."""
+    """1D noncausal convolution w/ 2-sides padding."""
 
     def __init__(
             self, 
@@ -61,7 +61,7 @@ class NonCausalConv1d(nn.Module):
     
 
 class NonCausalConvTranspose1d(nn.Module):
-    """1D noncausal transpose convloution."""
+    """1D noncausal transpose convolution."""
 
     def __init__(
         self,
