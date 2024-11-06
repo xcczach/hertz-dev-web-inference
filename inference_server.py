@@ -80,7 +80,7 @@ class AudioProcessor:
                 self.next_model_audio = self.model.next_audio_from_audio(self.loaded_audio.unsqueeze(0), temps=TEMPS)
         self.prompt_buffer = None
         self.prompt_position = 0
-        self.chunks_until_live = int(replay_seconds * 8)
+        self.chunks_until_live = int(self.replay_seconds * 8)
         self.initialize_prompt_buffer()
         print_colored("AudioProcessor state initialized", "green")
 
