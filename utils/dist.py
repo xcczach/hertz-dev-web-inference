@@ -76,8 +76,12 @@ def init_dist():
     return rank, local_rank, world_size
 
 def load_ckpt(load_from_location, expected_hash=None):
+    os.environ['HF_HUB_ENABLE_HF_TRANSFER'] = '1' #Disable this to speed up debugging errors with downloading from the hub
     if local0():
-        save_path = hf_hub_download(repo_id="si-pbc/hertz-dev", filename=f"{load_from_location}.pt")
+        repo_id = "si-pbc/hertz-dev"
+        print0(f'Loading checkpoint from repo_id {repo_id} and filename {load_from_location}.pt. This may take a while...')
+        save_path = hf_hub_download(repo_id=repo_id, filename=f"{load_from_location}.pt")
+        print0(f'Downloaded checkpoint to {save_path}')
         if expected_hash is not None:
             with open(save_path, 'rb') as f:
                 file_hash = hashlib.md5(f.read()).hexdigest()
@@ -88,5 +92,7 @@ def load_ckpt(load_from_location, expected_hash=None):
     if T.distributed.is_initialized():
         save_path = [save_path]
         T.distributed.broadcast_object_list(save_path, src=0)
-    loaded = T.load(save_path[0], weights_only=False, map_location='cpu')    
+        save_path = save_path[0]
+    loaded = T.load(save_path, weights_only=False, map_location='cpu')
+    print0(f'Loaded checkpoint from {save_path}')
     return loaded
