@@ -2,8 +2,11 @@
 *.wav
 *.mp3
 *.m4a
+!en_sample.wav
 !prompts/*.wav
 !prompts/*.mp3
 !prompts/*.m4a
 __pycache__
 *ckpt
+nohup.out
+process_log.txt
