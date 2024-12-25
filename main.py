@@ -5,6 +5,7 @@ import argparse
 import torchaudio
 from tokenizer import make_tokenizer
 from model import get_hertz_dev_config
+import setproctitle
 
 audio_tokenizer = None
 generator = None
@@ -69,6 +70,7 @@ def hangup():
 
 
 if  __name__ == "__main__":
+    setproctitle.setproctitle("hertz-dev-web-inference")
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=9234)
     parser.add_argument("--api-name", type=str, default="miniomni")
