@@ -1,21 +1,23 @@
-# hertz-dev
+# Hertz web inference
 
-Hertz-dev is an open-source, first-of-its-kind base model for full-duplex conversational audio.
+Expose an HTTP API for inference.
 
-See our blog post for more details: https://si.inc/hertz-dev/
+## Install
 
-## Setup
-
-Inference is known to work on Python 3.10 and CUDA 12.1. Other versions have not been tested as thoroughly. If you want to use CUDA 12.1, you'll need to install torch with `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121` before running `pip install -r requirements.txt`.
-
-On Ubuntu you may need to install libportaudio: `sudo apt-get install libportaudio2`
-
-All three scripts will automatically download the models to the `./ckpt` directory, and checkpoints are also accessible at https://ckpt.si.inc/hertz-dev/index.txt
+```bash
+conda create -n <environment-name> python=3.11
+conda activate <environment-name>
+pip install -r requirements.txt
+```
 
 ## Usage
 
-We recommend starting by using `inference.ipynb` to generate one- or two-channel completions from a prompt.
+Start the server:
 
-Then, you can use `inference_client.py` and `inference_server.py` to talk to the model live through your microphone.
-These are currently experimental, and have primarily been tested with Ubuntu on the server and MacOS on the client.
+```bash
+python main.py
+```
 
+The API will be available at `http://localhost:9234/hertz` by default. You can change the port with `--port` and the API name with `--api-name`.
+
+`test_client.py` provides a sample call to the API.
