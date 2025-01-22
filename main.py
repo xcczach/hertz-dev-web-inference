@@ -2,8 +2,6 @@ from ml_web_inference import (
     expose,
     Request,
     StreamingResponse,
-    get_proper_device,
-    get_model_size_mb,
 )
 import torch
 import io
@@ -69,13 +67,19 @@ async def inference(request: Request) -> StreamingResponse:
 
 def init():
     global audio_tokenizer, generator, device
-    device = get_proper_device(20000)
-    audio_tokenizer = make_tokenizer(device=f"cuda:{device}")
+    device = "cuda"
+    audio_tokenizer = make_tokenizer(
+        device=f"cuda:{device}" if type(device) == int else device
+    )
     generator_config = get_hertz_dev_config(
         is_split=False, use_pure_audio_ablation=False
     )
     generator = generator_config()
-    generator = generator.eval().to(torch.bfloat16).to(f"cuda:{device}")
+    generator = (
+        generator.eval()
+        .to(torch.bfloat16)
+        .to(f"cuda:{device}" if type(device) == int else device)
+    )
     # print(f"Model size: {get_model_size_mb(generator):.2f} MB")
 
 
