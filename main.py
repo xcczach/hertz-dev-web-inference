@@ -64,12 +64,15 @@ async def inference(request: Request) -> StreamingResponse:
         .cpu()
     )
 
-    speech_timestamps = get_speech_timestamps(
-        result_arr, vad_model, sampling_rate=target_sample_rate
-    )
-    result_arr = result_arr[
-        int(speech_timestamps[0]["start"]) : int(speech_timestamps[-1]["end"])
-    ]
+    try:
+        speech_timestamps = get_speech_timestamps(
+            result_arr, vad_model, sampling_rate=target_sample_rate
+        )
+        result_arr = result_arr[
+            int(speech_timestamps[0]["start"]) : int(speech_timestamps[-1]["end"])
+        ]
+    except Exception as e:
+        print(e)
     result_arr = result_arr.unsqueeze(0)
 
     result = io.BytesIO()
