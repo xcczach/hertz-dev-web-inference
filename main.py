@@ -10,10 +10,12 @@ import torchaudio
 from tokenizer import make_tokenizer
 from model import get_hertz_dev_config
 import setproctitle
+from silero_vad import load_silero_vad, get_speech_timestamps
 
 audio_tokenizer = None
 generator = None
 device = None
+vad_model = None
 
 
 async def inference(request: Request) -> StreamingResponse:
@@ -21,7 +23,8 @@ async def inference(request: Request) -> StreamingResponse:
     sample_rate = data["sample_rate"]
     audio_data = data["audio_data"]
 
-    gen_len = 20 * 8
+    gen_secs = 70
+    gen_len = gen_secs * 8
     audio_tensor = torch.tensor(audio_data).unsqueeze(0)
     target_sample_rate = 16000
     if sample_rate != target_sample_rate:
@@ -55,9 +58,19 @@ async def inference(request: Request) -> StreamingResponse:
     if audio_tensor.abs().max() > 1:
         audio_tensor = audio_tensor / audio_tensor.abs().max()
 
-    result_arr = audio_tensor[
-        :, max(int(prompt_len_seconds * sample_rate - sample_rate), 0) :
+    result_arr = (
+        audio_tensor[:, max(int(prompt_len_seconds * sample_rate - sample_rate), 0) :]
+        .squeeze()
+        .cpu()
+    )
+
+    speech_timestamps = get_speech_timestamps(
+        result_arr, vad_model, sampling_rate=target_sample_rate
+    )
+    result_arr = result_arr[
+        int(speech_timestamps[0]["start"]) : int(speech_timestamps[-1]["end"])
     ]
+    result_arr = result_arr.unsqueeze(0)
 
     result = io.BytesIO()
     torchaudio.save(result, result_arr, target_sample_rate, format="wav")
@@ -66,7 +79,7 @@ async def inference(request: Request) -> StreamingResponse:
 
 
 def init():
-    global audio_tokenizer, generator, device
+    global audio_tokenizer, generator, device, vad_model
     device = "cuda"
     audio_tokenizer = make_tokenizer(
         device=f"cuda:{device}" if type(device) == int else device
@@ -80,13 +93,14 @@ def init():
         .to(torch.bfloat16)
         .to(f"cuda:{device}" if type(device) == int else device)
     )
-    # print(f"Model size: {get_model_size_mb(generator):.2f} MB")
+    vad_model = load_silero_vad()
 
 
 def hangup():
-    global audio_tokenizer, generator
+    global audio_tokenizer, generator, vad_model
     del audio_tokenizer
     del generator
+    del vad_model
     torch.cuda.empty_cache()
 
 
